@@ -1,0 +1,40 @@
+# OS
+.DS_Store
+
+# General
+*.user
+*.suo
+*.swp
+*.tmp
+*.log
+
+# .NET build outputs
+**/bin/
+**/obj/
+**/out/
+**/Debug/
+**/Release/
+
+# Rider / ReSharper
+.idea/
+*.sln.iml
+_ReSharper*/
+
+# Visual Studio Code
+.vscode/
+
+# Node / Angular (for Frontend)
+node_modules/
+dist/
+dist-ssr/
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+package-lock.json
+
+# Coverage / test
+coverage/
+TestResults/
+
