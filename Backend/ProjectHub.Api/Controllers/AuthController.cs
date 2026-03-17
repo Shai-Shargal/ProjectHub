@@ -4,9 +4,9 @@ using ProjectHub.Api.Services;
 
 namespace ProjectHub.Api.Controllers;
 
-[ApiController] //mark the class as a controller
-[Route("api/[controller]")] //define the route for the controller
-public class AuthController : ControllerBase //inherit from ControllerBase - from the framework - this is a base class for all controllers
+[ApiController] 
+[Route("api/[controller]")] 
+public class AuthController : ControllerBase 
 {
     private readonly IAuthService _authService;
 
@@ -22,7 +22,8 @@ public class AuthController : ControllerBase //inherit from ControllerBase - fro
 
         if (result is null)
         {
-            return Unauthorized();
+            return Unauthorized(new {message = "Invalid email or password"});
+
         }
 
         return Ok(result);

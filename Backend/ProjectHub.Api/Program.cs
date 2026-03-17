@@ -20,11 +20,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Root endpoint so GET / returns something instead of 404
+app.MapGet("/", () => Results.Ok(new { message = "ProjectHub API", docs = "/swagger" }));
 
 app.Run();
 
