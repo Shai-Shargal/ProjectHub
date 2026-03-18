@@ -593,12 +593,16 @@ export class InfoComponent implements OnInit {
 
   onDeleteProject(id: number): void {
     if (this.projectsBusy) return;
-    const ok = window.confirm('Delete this project?');
-    if (!ok) return;
 
     this.projectService.deleteProject(id).subscribe({
       next: () => {
+        // Optimistically remove from current table (helps if reload is slow/glitchy).
+        this.projects = this.projects.filter((p) => p.id !== id);
+        this.applyTablePipeline();
         if (this.editProjectId === id) this.editProjectId = null;
+        this.cdr.markForCheck();
+
+        // Then reload from API to confirm final state.
         this.reloadProjects(false);
       },
       error: (err) => {

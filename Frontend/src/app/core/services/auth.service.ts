@@ -58,7 +58,16 @@ export class AuthService {
 
   register(payload: RegisterRequest): Observable<AuthResponse> {
     return this.http
-      .post<AuthResponse>(`${environment.apiBaseUrl}/api/auth/register`, payload);
+      .post<AuthResponse>(`${environment.apiBaseUrl}/api/auth/register`, payload)
+      .pipe(
+        tap((res: AuthResponse) => {
+          if (res?.token && res?.personalDetails) {
+            this.setSession(res.token, res.personalDetails);
+          } else if (res?.userId !== undefined && res?.personalDetails) {
+            this.setSession(String(res.userId), res.personalDetails);
+          }
+        })
+      );
   }
 
   getToken(): string | null {

@@ -67,6 +67,10 @@ export class ProjectService {
   }
 
   deleteProject(id: number): Observable<void> {
+    if (!Number.isFinite(id) || id <= 0) {
+      return throwError(() => new Error('Invalid project id'));
+    }
+
     const token = this.authService.getToken();
     if (!token) {
       return throwError(() => new Error('Not authenticated'));
@@ -76,12 +80,17 @@ export class ProjectService {
       Authorization: `Bearer ${token}`
     });
 
-    return this.http.delete<any>(`${environment.apiBaseUrl}/api/projects/${id}`, { headers }).pipe(map(() => undefined));
+    // Backend returns 204 No Content. Using responseType 'text' prevents JSON parsing issues.
+    return this.http
+      .delete(`${environment.apiBaseUrl}/api/projects/${id}`, { headers, responseType: 'text' })
+      .pipe(map(() => undefined));
   }
 
   private normalizeProject(p: any): Project {
+    const rawId = p?.id ?? p?.Id ?? 0;
+    const id = Number(rawId);
     return {
-      id: p.id ?? p.Id ?? 0,
+      id: Number.isFinite(id) ? id : 0,
       name: p.name ?? p.Name ?? '',
       score: p.score ?? p.Score ?? 0,
       durationInDays: p.durationInDays ?? p.DurationInDays ?? 0,

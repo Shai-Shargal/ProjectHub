@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -118,7 +118,8 @@ export class RegisterComponent {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly authService: AuthService
+    private readonly authService: AuthService,
+    private readonly router: Router
   ) {
     // Initialize the form after `fb` exists to satisfy strict Angular compiler checks.
     this.form = this.fb.group({
@@ -186,9 +187,8 @@ export class RegisterComponent {
     this.authService.register({ name, email, password, team, avatar }).subscribe({
       next: () => {
         this.loading = false;
-        // Requirement: do NOT auto-login after registering.
-        // Clear any existing session artifacts and send the user to login.
-        this.authService.logout();
+        // Auto-login after successful registration and redirect to /info.
+        this.router.navigateByUrl('/info');
       },
       error: (err) => {
         this.loading = false;

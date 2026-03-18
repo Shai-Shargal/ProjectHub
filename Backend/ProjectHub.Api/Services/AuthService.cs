@@ -81,6 +81,7 @@ public class AuthService : IAuthService
 
         return new RegisterResponse
         {
+            Token = user.Id.ToString(),
             UserId = user.Id,
             Email = user.Email,
             PersonalDetails = new PersonalDetailsDto

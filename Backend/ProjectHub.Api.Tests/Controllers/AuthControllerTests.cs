@@ -94,6 +94,7 @@ public class AuthControllerTests
         var authService = new Mock<IAuthService>();
         var response = new RegisterResponse
         {
+            Token = "1",
             UserId = 1,
             Email = "a@test.com",
             PersonalDetails = new PersonalDetailsDto

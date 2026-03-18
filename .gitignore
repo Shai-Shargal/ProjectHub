@@ -38,3 +38,24 @@ package-lock.json
 coverage/
 TestResults/
 
+# Frontend (Angular) build outputs + tooling caches
+/Frontend/dist/
+/Frontend/out-tsc
+/.angular/cache
+.angular/cache
+/Frontend/.angular/
+.sass-cache/
+/Frontend/tmp
+/Frontend/bazel-out
+__screenshots__/
+/Frontend/node_modules/
+
+# Misc files (frontend/dev)
+connect.lock
+testem.log
+/typings
+/libpeerconnection.log
+
+# OS junk
+Thumbs.db
+

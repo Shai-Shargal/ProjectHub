@@ -47,6 +47,8 @@ public class AuthServiceTests
         user.Team.Should().Be("General");
         user.Avatar.Should().Be("https://example.com/avatars/new-user.png");
 
+        result!.Token.Should().Be(result.UserId.ToString());
+
         user.PasswordHash.Should().NotBeNullOrWhiteSpace();
         user.PasswordHash.Should().Contain(":");
         user.PasswordHash.Should().NotContain("Password123");
