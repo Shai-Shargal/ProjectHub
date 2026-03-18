@@ -6,7 +6,7 @@ namespace ProjectHub.Api.Controllers;
 
 [ApiController] 
 [Route("api/[controller]")] 
-public class AuthController : ControllerBase 
+public class AuthController : ControllerBase //i need to understand it more 
 {
     private readonly IAuthService _authService;
 
