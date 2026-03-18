@@ -9,4 +9,5 @@ public class User
     public string Team { get; set; } = string.Empty;
     public DateTime JoinedDate { get; set; }
     public string Avatar { get; set; } = string.Empty;
+    public ICollection<Project> Projects { get; set; } = new List<Project>();
 }
