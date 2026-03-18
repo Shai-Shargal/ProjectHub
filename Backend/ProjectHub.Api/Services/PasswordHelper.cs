@@ -62,5 +62,53 @@ public static class PasswordHelper
         var actualHash = pbkdf2.GetBytes(HashSizeBytes);
         return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
     }
+
+    public static bool TryValidatePasswordComplexity(string password, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "Password is required.";
+            return false;
+        }
+
+        if (password.Length < 8)
+        {
+            errorMessage = "Password must be at least 8 characters long.";
+            return false;
+        }
+
+        var hasUpper = false;
+        var hasLower = false;
+        var hasDigit = false;
+
+        foreach (var c in password)
+        {
+            if (c is >= 'A' and <= 'Z') hasUpper = true;
+            else if (c is >= 'a' and <= 'z') hasLower = true;
+            else if (c is >= '0' and <= '9') hasDigit = true;
+        }
+
+        if (!hasUpper)
+        {
+            errorMessage = "Password must contain at least one uppercase English letter (A-Z).";
+            return false;
+        }
+
+        if (!hasLower)
+        {
+            errorMessage = "Password must contain at least one lowercase English letter (a-z).";
+            return false;
+        }
+
+        if (!hasDigit)
+        {
+            errorMessage = "Password must contain at least one digit (0-9).";
+            return false;
+        }
+
+        return true;
+    }
 }
 
