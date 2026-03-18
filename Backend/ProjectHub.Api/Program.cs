@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ProjectHubDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 var app = builder.Build();
 
@@ -50,7 +51,7 @@ static void SeedDatabase(ProjectHubDbContext db)
     {
         new User
         {
-            Email = "user@test.com",
+            Email = "user@test.com".ToLowerInvariant(),
             PasswordHash = AuthService.HashPassword("Password123"),
             Name = "Test User",
             Team = "Engineering",
@@ -59,7 +60,7 @@ static void SeedDatabase(ProjectHubDbContext db)
         },
         new User
         {
-            Email = "admin@test.com",
+            Email = "admin@test.com".ToLowerInvariant(),
             PasswordHash = AuthService.HashPassword("Password123"),
             Name = "Admin User",
             Team = "Operations",
@@ -70,16 +71,24 @@ static void SeedDatabase(ProjectHubDbContext db)
 
     foreach (var user in seedUsers)
     {
-        if (!db.Users.Any(u => u.Email == user.Email))
+        var normalizedSeedEmail = user.Email.Trim().ToLowerInvariant();
+        var existing = db.Users.FirstOrDefault(u => u.Email.ToLower() == normalizedSeedEmail);
+
+        if (existing is null)
         {
             db.Users.Add(user);
+        }
+        else if (!string.Equals(existing.Email, normalizedSeedEmail, StringComparison.Ordinal))
+        {
+            // Ensure stored emails stay in normalized form.
+            existing.Email = normalizedSeedEmail;
         }
     }
 
     db.SaveChanges();
 
-    var user1 = db.Users.Single(u => u.Email == seedUsers[0].Email);
-    var user2 = db.Users.Single(u => u.Email == seedUsers[1].Email);
+    var user1 = db.Users.Single(u => u.Email.ToLower() == seedUsers[0].Email);
+    var user2 = db.Users.Single(u => u.Email.ToLower() == seedUsers[1].Email);
 
     // Seed projects idempotently (by UserId + Name).
     var user1Projects = new[]
