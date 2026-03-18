@@ -22,6 +22,40 @@ namespace ProjectHub.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ProjectHub.Api.Models.Project", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BugsCount")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("MadeDeadline")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Projects");
+                });
+
             modelBuilder.Entity("ProjectHub.Api.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -56,6 +90,17 @@ namespace ProjectHub.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("ProjectHub.Api.Models.Project", b =>
+                {
+                    b.HasOne("ProjectHub.Api.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
