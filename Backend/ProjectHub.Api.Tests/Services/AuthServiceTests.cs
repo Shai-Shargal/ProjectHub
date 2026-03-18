@@ -28,7 +28,14 @@ public class AuthServiceTests
         using var db = CreateDbContext();
         var sut = new AuthService(db);
 
-        var request = new RegisterRequest { Email = "new@test.com", Password = "Password123" };
+        var request = new RegisterRequest
+        {
+            Email = "new@test.com",
+            Password = "Password123",
+            Name = "New User",
+            Team = "General",
+            Avatar = "https://example.com/avatars/new-user.png"
+        };
         var result = sut.Register(request);
 
         result.Should().NotBeNull();
@@ -36,6 +43,9 @@ public class AuthServiceTests
 
         var user = db.Users.Single(u => u.Id == result.UserId);
         user.Email.Should().Be("new@test.com");
+        user.Name.Should().Be("New User");
+        user.Team.Should().Be("General");
+        user.Avatar.Should().Be("https://example.com/avatars/new-user.png");
 
         user.PasswordHash.Should().NotBeNullOrWhiteSpace();
         user.PasswordHash.Should().Contain(":");
@@ -48,7 +58,14 @@ public class AuthServiceTests
         using var db = CreateDbContext();
         var sut = new AuthService(db);
 
-        var request = new RegisterRequest { Email = "  A@Test.com  ", Password = "Password123" };
+        var request = new RegisterRequest
+        {
+            Email = "  A@Test.com  ",
+            Password = "Password123",
+            Name = "Name",
+            Team = "Team",
+            Avatar = "https://example.com/avatars/name.png"
+        };
         var result = sut.Register(request);
 
         result.Should().NotBeNull();
@@ -75,7 +92,14 @@ public class AuthServiceTests
         });
         db.SaveChanges();
 
-        var request = new RegisterRequest { Email = "A@test.com", Password = "Password123" };
+        var request = new RegisterRequest
+        {
+            Email = "A@test.com",
+            Password = "Password123",
+            Name = "Someone",
+            Team = "Somewhere",
+            Avatar = string.Empty
+        };
         var result = sut.Register(request);
 
         result.Should().BeNull();

@@ -44,6 +44,13 @@ public class AuthController : ControllerBase //i need to understand it more
             return BadRequest(new { message = passwordError });
         }
 
+        if (string.IsNullOrWhiteSpace(request.Name) ||
+            string.IsNullOrWhiteSpace(request.Team) ||
+            string.IsNullOrWhiteSpace(request.Avatar))
+        {
+            return BadRequest(new { message = "Name, team, and avatar are required" });
+        }
+
         var result = _authService.Register(request);
         if (result is null)
         {

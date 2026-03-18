@@ -72,7 +72,14 @@ public class AuthControllerTests
             HttpContext = new DefaultHttpContext()
         };
 
-        var request = new RegisterRequest { Email = "a@test.com", Password = "Password123" };
+        var request = new RegisterRequest
+        {
+            Email = "a@test.com",
+            Password = "Password123",
+            Name = "Existing User",
+            Team = "General",
+            Avatar = "https://example.com/avatar.png"
+        };
         var result = sut.Register(request);
 
         result.Result.Should().BeOfType<ConflictObjectResult>();
@@ -108,7 +115,14 @@ public class AuthControllerTests
             HttpContext = new DefaultHttpContext()
         };
 
-        var request = new RegisterRequest { Email = "a@test.com", Password = "Password123" };
+        var request = new RegisterRequest
+        {
+            Email = "a@test.com",
+            Password = "Password123",
+            Name = "New User",
+            Team = "General",
+            Avatar = string.Empty
+        };
         var result = sut.Register(request);
 
         result.Result.Should().BeOfType<OkObjectResult>();

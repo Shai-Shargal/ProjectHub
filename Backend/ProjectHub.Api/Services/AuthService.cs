@@ -70,10 +70,10 @@ public class AuthService : IAuthService
         {
             Email = normalizedEmail,
             PasswordHash = HashPassword(request.Password),
-            Name = "New User",
-            Team = "General",
+            Name = (request.Name ?? string.Empty).Trim(),
+            Team = (request.Team ?? string.Empty).Trim(),
             JoinedDate = DateTime.UtcNow,
-            Avatar = string.Empty
+            Avatar = (request.Avatar ?? string.Empty).Trim()
         };
 
         _db.Users.Add(user);
