@@ -22,12 +22,18 @@ This frontend is a small Angular application for:
 
 ### Routing
 - `src/app/app.routes.ts`: defines routes:
-  - `/login` -> `LoginComponent`
-  - `/register` -> `RegisterComponent`
-  - `/info` -> `InfoComponent` (guarded)
+  - `login` -> `LoginComponent`
+  - `register` -> `RegisterComponent`
+  - `info` -> `InfoComponent` (guarded)
+  - Note: route config uses slash-less `path` values; navigation uses URL constants like `/login`.
 
 ### Route guard
 - `src/app/core/guards/auth.guard.ts`: `CanActivateFn` that returns `true` when `AuthService.isAuthenticated()` is true; otherwise it redirects to `/login`.
+
+### Route constants
+- `src/app/shared/constants/routes.ts`
+  - `ROUTE_PATHS`: `login` / `register` / `info` (used in route config)
+  - `ROUTES`: `/login` / `/register` / `/info` (used for navigation/redirects)
 
 ### Core services
 - `src/app/core/services/auth.service.ts`
@@ -36,8 +42,11 @@ This frontend is a small Angular application for:
   - exposes `isAuthenticated()`, `getToken()`, `getPersonalDetails()`
 - `src/app/core/services/project.service.ts`
   - calls protected endpoints under `/api/projects`
-  - attaches the token using `Authorization: Bearer <token>`
   - normalizes backend responses into the frontend `Project` model
+
+### HTTP interceptor (auth header)
+- `src/app/core/interceptors/auth-token.interceptor.ts`
+  - automatically adds `Authorization: Bearer <token>` to outgoing API requests (when a token exists)
 
 ### Features (UI)
 - `src/app/features/auth/components/login/login.component.ts`
@@ -62,6 +71,10 @@ This frontend is a small Angular application for:
 ### Shared models
 - `src/app/shared/models/auth.models.ts`: `LoginRequest`, `AuthResponse`, `PersonalDetails`, `RegisterRequest`
 - `src/app/shared/models/project.models.ts`: `Project` + create/update request shapes
+
+### Shared helpers
+- `src/app/shared/validators/password.validators.ts`: shared password regex + validators used by auth forms
+- `src/app/shared/utils/error.utils.ts`: shared `extractErrorMessage()` helper used by components
 
 ## Local development
 

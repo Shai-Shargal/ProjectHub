@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 
 import { AuthResponse, LoginRequest, PersonalDetails, RegisterRequest } from '../../shared/models/auth.models';
 import { environment } from '../../../environments/environment';
+import { ROUTES } from '../../shared/constants/routes';
 
 const TOKEN_KEY = 'projecthub_token';
 const PERSONAL_DETAILS_KEY = 'projecthub_personalDetails';
@@ -87,7 +88,7 @@ export class AuthService {
     localStorage.removeItem(PERSONAL_DETAILS_KEY);
     this.tokenSubject.next(null);
     this.personalDetailsSubject.next(null);
-    this.router.navigateByUrl('/login');
+    this.router.navigateByUrl(ROUTES.LOGIN);
   }
 
   /**
