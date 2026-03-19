@@ -1,0 +1,37 @@
+.auth-shell {
+  max-width: 520px;
+  margin: 24px auto;
+  padding: 16px;
+}
+
+label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  margin-top: 6px;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.error {
+  color: #b00020;
+  margin-top: 6px;
+}
+
+.loading {
+  margin-top: 10px;
+}
+
+.register-link {
+  margin-top: 14px;
+}
+

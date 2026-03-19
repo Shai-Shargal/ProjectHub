@@ -1,0 +1,15 @@
+<section class="card user-card">
+  <div class="avatar-wrap">
+    <img class="avatar" [src]="personalDetails.avatar" alt="Avatar" />
+  </div>
+
+  <div class="user-fields">
+    <div><strong>Name:</strong> {{ personalDetails.name }}</div>
+    <div><strong>Team:</strong> {{ personalDetails.team }}</div>
+    <div>
+      <strong>Joined Date:</strong>
+      {{ personalDetails.joinedDate | date : 'mediumDate' }}
+    </div>
+  </div>
+</section>
+
