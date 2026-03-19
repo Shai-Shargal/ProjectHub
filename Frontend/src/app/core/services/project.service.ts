@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -20,11 +20,9 @@ export class ProjectService {
       return throwError(() => new Error('Not authenticated'));
     }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    return this.http.get<any[]>(`${environment.apiBaseUrl}/api/projects`, { headers }).pipe(map((items) => (items ?? []).map((p) => this.normalizeProject(p))));
+    return this.http
+      .get<any[]>(`${environment.apiBaseUrl}/api/projects`)
+      .pipe(map((items) => (items ?? []).map((p) => this.normalizeProject(p))));
   }
 
   getProjectById(id: number): Observable<Project> {
@@ -33,11 +31,9 @@ export class ProjectService {
       return throwError(() => new Error('Not authenticated'));
     }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    return this.http.get<any>(`${environment.apiBaseUrl}/api/projects/${id}`, { headers }).pipe(map((p) => this.normalizeProject(p)));
+    return this.http
+      .get<any>(`${environment.apiBaseUrl}/api/projects/${id}`)
+      .pipe(map((p) => this.normalizeProject(p)));
   }
 
   createProject(payload: ProjectCreateRequest): Observable<Project> {
@@ -46,11 +42,9 @@ export class ProjectService {
       return throwError(() => new Error('Not authenticated'));
     }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    return this.http.post<any>(`${environment.apiBaseUrl}/api/projects`, payload, { headers }).pipe(map((p) => this.normalizeProject(p)));
+    return this.http
+      .post<any>(`${environment.apiBaseUrl}/api/projects`, payload)
+      .pipe(map((p) => this.normalizeProject(p)));
   }
 
   updateProject(id: number, payload: ProjectUpdateRequest): Observable<Project> {
@@ -59,11 +53,9 @@ export class ProjectService {
       return throwError(() => new Error('Not authenticated'));
     }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
-    return this.http.put<any>(`${environment.apiBaseUrl}/api/projects/${id}`, payload, { headers }).pipe(map((p) => this.normalizeProject(p)));
+    return this.http
+      .put<any>(`${environment.apiBaseUrl}/api/projects/${id}`, payload)
+      .pipe(map((p) => this.normalizeProject(p)));
   }
 
   deleteProject(id: number): Observable<void> {
@@ -76,13 +68,9 @@ export class ProjectService {
       return throwError(() => new Error('Not authenticated'));
     }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
     // Backend returns 204 No Content. Using responseType 'text' prevents JSON parsing issues.
     return this.http
-      .delete(`${environment.apiBaseUrl}/api/projects/${id}`, { headers, responseType: 'text' })
+      .delete(`${environment.apiBaseUrl}/api/projects/${id}`, { responseType: 'text' })
       .pipe(map(() => undefined));
   }
 

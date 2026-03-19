@@ -6,11 +6,14 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ProjectService } from '../../../../core/services/project.service';
 import { PersonalDetails } from '../../../../shared/models/auth.models';
 import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '../../../../shared/models/project.models';
+import { computeProjectsStatsFromFiltered, filterProjects, sortProjects, DeadlineFilter, SortColumn, SortDirection } from '../../utils/projects-table.utils';
+import { ProjectsTableComponent } from '../projects-table/projects-table.component';
+import { UserCardComponent } from '../user-card/user-card.component';
 
 @Component({
   standalone: true,
   selector: 'app-info',
-  imports: [CommonModule],
+  imports: [CommonModule, UserCardComponent, ProjectsTableComponent],
   template: `
     <div class="page" *ngIf="!loading; else loadingTpl">
       <div class="header-row">
@@ -19,189 +22,36 @@ import { Project, ProjectCreateRequest, ProjectUpdateRequest } from '../../../..
       </div>
 
       <div class="layout">
-        <section class="card user-card" *ngIf="personalDetails">
-          <div class="avatar-wrap">
-            <img class="avatar" [src]="personalDetails.avatar" alt="Avatar" />
-          </div>
+        <app-user-card *ngIf="personalDetails" [personalDetails]="personalDetails"></app-user-card>
 
-          <div class="user-fields">
-            <div><strong>Name:</strong> {{ personalDetails.name }}</div>
-            <div><strong>Team:</strong> {{ personalDetails.team }}</div>
-            <div>
-              <strong>Joined Date:</strong>
-              {{ personalDetails.joinedDate | date : 'mediumDate' }}
-            </div>
-          </div>
-        </section>
-
-        <section class="card projects-card">
-          <div class="mutator-card">
-            <h3>Create Project</h3>
-
-            <div class="mutator-grid">
-              <label>
-                Project Name
-                <input type="text" [value]="newProject.name" (input)="onNewText($any($event.target).value, 'name')" />
-              </label>
-
-              <label>
-                Score
-                <input type="number" [value]="newProject.score" (input)="onNewNumber($any($event.target).value, 'score')" />
-              </label>
-
-              <label>
-                Duration In Days
-                <input type="number" [value]="newProject.durationInDays" (input)="onNewNumber($any($event.target).value, 'durationInDays')" />
-              </label>
-
-              <label>
-                Bugs Count
-                <input type="number" [value]="newProject.bugsCount" (input)="onNewNumber($any($event.target).value, 'bugsCount')" />
-              </label>
-
-              <label class="checkbox">
-                <input type="checkbox" [checked]="newProject.madeDeadline" (change)="newProject.madeDeadline = $any($event.target).checked" />
-                Made Deadline
-              </label>
-            </div>
-
-            <button type="button" [disabled]="projectsBusy || !newProject.name.trim()" (click)="onCreateProject()">
-              Create
-            </button>
-
-            <div class="error" *ngIf="projectsError">{{ projectsError }}</div>
-          </div>
-
-          <div class="stats">
-            <div class="stat">
-              <div class="label">Average Project Score</div>
-              <div class="value">{{ averageScore | number : '1.0-2' }}</div>
-            </div>
-            <div class="stat">
-              <div class="label">Deadline Met Percentage</div>
-              <div class="value">{{ percentageMetDeadline | number : '1.0-2' }}%</div>
-            </div>
-          </div>
-
-          <div class="filters">
-            <label class="filter">
-              Filter by project name
-              <input
-                type="text"
-                placeholder="e.g. Apollo"
-                (input)="onNameFilterInput($any($event.target).value)"
-              />
-            </label>
-
-            <label class="filter">
-              Made deadline
-              <select (change)="onDeadlineFilterInput($any($event.target).value)">
-                <option value="all">All</option>
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </label>
-          </div>
-
-          <table class="projects-table" *ngIf="visibleProjects.length > 0; else noProjectsTpl">
-            <thead>
-              <tr>
-                <th class="sortable" (click)="onSort('name')">
-                  Project Name
-                  <span class="sort-indicator" *ngIf="sortColumn === 'name'">
-                    {{ sortDirection === 'asc' ? '^' : 'v' }}
-                  </span>
-                </th>
-                <th class="sortable" (click)="onSort('score')">
-                  Score
-                  <span class="sort-indicator" *ngIf="sortColumn === 'score'">
-                    {{ sortDirection === 'asc' ? '^' : 'v' }}
-                  </span>
-                </th>
-                <th class="sortable" (click)="onSort('durationInDays')">
-                  Duration In Days
-                  <span class="sort-indicator" *ngIf="sortColumn === 'durationInDays'">
-                    {{ sortDirection === 'asc' ? '^' : 'v' }}
-                  </span>
-                </th>
-                <th class="sortable" (click)="onSort('bugsCount')">
-                  Bugs Count
-                  <span class="sort-indicator" *ngIf="sortColumn === 'bugsCount'">
-                    {{ sortDirection === 'asc' ? '^' : 'v' }}
-                  </span>
-                </th>
-                <th class="sortable" (click)="onSort('madeDeadline')">
-                  Made Deadline
-                  <span class="sort-indicator" *ngIf="sortColumn === 'madeDeadline'">
-                    {{ sortDirection === 'asc' ? '^' : 'v' }}
-                  </span>
-                </th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of visibleProjects">
-                <td>{{ p.name }}</td>
-                <td
-                  class="score-cell"
-                  [ngClass]="{
-                    'score-low': p.score < 70,
-                    'score-high': p.score > 90
-                  }"
-                >
-                  {{ p.score }}
-                </td>
-                <td>{{ p.durationInDays }}</td>
-                <td>{{ p.bugsCount }}</td>
-                <td>{{ p.madeDeadline ? 'Yes' : 'No' }}</td>
-                <td class="actions-cell">
-                  <button type="button" [disabled]="projectsBusy" (click)="startEdit(p)">Edit</button>
-                  <button type="button" class="danger" [disabled]="projectsBusy" (click)="onDeleteProject(p.id)">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <ng-template #noProjectsTpl>
-            <p class="muted">No projects to display.</p>
-          </ng-template>
-
-          <div class="edit-card" *ngIf="editProjectId !== null">
-            <h3>Edit Project</h3>
-
-            <div class="mutator-grid">
-              <label>
-                Project Name
-                <input type="text" [value]="editDraft.name" (input)="onEditText($any($event.target).value, 'name')" />
-              </label>
-
-              <label>
-                Score
-                <input type="number" [value]="editDraft.score" (input)="onEditNumber($any($event.target).value, 'score')" />
-              </label>
-
-              <label>
-                Duration In Days
-                <input type="number" [value]="editDraft.durationInDays" (input)="onEditNumber($any($event.target).value, 'durationInDays')" />
-              </label>
-
-              <label>
-                Bugs Count
-                <input type="number" [value]="editDraft.bugsCount" (input)="onEditNumber($any($event.target).value, 'bugsCount')" />
-              </label>
-
-              <label class="checkbox">
-                <input type="checkbox" [checked]="editDraft.madeDeadline" (change)="editDraft.madeDeadline = $any($event.target).checked" />
-                Made Deadline
-              </label>
-            </div>
-
-            <div class="edit-actions">
-              <button type="button" [disabled]="projectsBusy || !editDraft.name.trim()" (click)="onSaveEdit()">Save</button>
-              <button type="button" class="secondary" [disabled]="projectsBusy" (click)="cancelEdit()">Cancel</button>
-            </div>
-          </div>
-        </section>
+        <app-projects-table
+          [projectsBusy]="projectsBusy"
+          [projectsError]="projectsError"
+          [newProject]="newProject"
+          [averageScore]="averageScore"
+          [percentageMetDeadline]="percentageMetDeadline"
+          [nameFilter]="nameFilter"
+          [deadlineFilter]="deadlineFilter"
+          [sortColumn]="sortColumn"
+          [sortDirection]="sortDirection"
+          [visibleProjects]="visibleProjects"
+          [editProjectId]="editProjectId"
+          [editDraft]="editDraft"
+          (createProject)="onCreateProject()"
+          (deleteProject)="onDeleteProject($event)"
+          (startEdit)="startEdit($event)"
+          (cancelEdit)="cancelEdit()"
+          (saveEdit)="onSaveEdit()"
+          (newTextInput)="onNewText($event.value, $event.field)"
+          (newNumberInput)="onNewNumber($event.value, $event.field)"
+          (newMadeDeadlineChange)="onNewMadeDeadlineChange($event)"
+          (editTextInput)="onEditText($event.value, $event.field)"
+          (editNumberInput)="onEditNumber($event.value, $event.field)"
+          (editMadeDeadlineChange)="onEditMadeDeadlineChange($event)"
+          (nameFilterInput)="onNameFilterInput($event)"
+          (deadlineFilterInput)="onDeadlineFilterInput($event)"
+          (sortChange)="onSort($event)"
+        ></app-projects-table>
       </div>
 
       <div class="error" *ngIf="errorMessage">
@@ -405,10 +255,10 @@ export class InfoComponent implements OnInit {
   visibleProjects: Project[] = [];
 
   nameFilter = '';
-  deadlineFilter: 'all' | 'yes' | 'no' = 'all';
+  deadlineFilter: DeadlineFilter = 'all';
 
-  sortColumn: 'name' | 'score' | 'durationInDays' | 'bugsCount' | 'madeDeadline' = 'name';
-  sortDirection: 'asc' | 'desc' = 'asc';
+  sortColumn: SortColumn = 'name';
+  sortDirection: SortDirection = 'asc';
 
   averageScore = 0;
   percentageMetDeadline = 0;
@@ -531,6 +381,10 @@ export class InfoComponent implements OnInit {
     if (field === 'bugsCount') this.newProject.bugsCount = Number.isFinite(num) ? num : 0;
   }
 
+  onNewMadeDeadlineChange(checked: boolean): void {
+    this.newProject.madeDeadline = checked;
+  }
+
   onCreateProject(): void {
     if (this.projectsBusy || !this.newProject.name.trim()) return;
 
@@ -576,6 +430,10 @@ export class InfoComponent implements OnInit {
     if (field === 'bugsCount') this.editDraft.bugsCount = Number.isFinite(num) ? num : 0;
   }
 
+  onEditMadeDeadlineChange(checked: boolean): void {
+    this.editDraft.madeDeadline = checked;
+  }
+
   onSaveEdit(): void {
     if (this.projectsBusy || this.editProjectId === null || !this.editDraft.name.trim()) return;
 
@@ -618,14 +476,14 @@ export class InfoComponent implements OnInit {
   }
 
   onDeadlineFilterInput(value: string): void {
-    const next = value as 'all' | 'yes' | 'no';
+    const next = value as DeadlineFilter;
     if (next === 'all' || next === 'yes' || next === 'no') {
       this.deadlineFilter = next;
       this.applyTablePipeline();
     }
   }
 
-  onSort(column: 'name' | 'score' | 'durationInDays' | 'bugsCount' | 'madeDeadline'): void {
+  onSort(column: SortColumn): void {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
@@ -636,69 +494,14 @@ export class InfoComponent implements OnInit {
   }
 
   private applyTablePipeline(): void {
-    this.filteredProjects = this.projects.filter((p) => {
-      const matchesName =
-        this.nameFilter.trim().length === 0 ||
-        p.name.toLowerCase().includes(this.nameFilter.trim().toLowerCase());
+    this.filteredProjects = filterProjects(this.projects, this.nameFilter, this.deadlineFilter);
+    this.visibleProjects = sortProjects(this.filteredProjects, this.sortColumn, this.sortDirection);
 
-      const matchesDeadline =
-        this.deadlineFilter === 'all' ||
-        (this.deadlineFilter === 'yes' && p.madeDeadline === true) ||
-        (this.deadlineFilter === 'no' && p.madeDeadline === false);
-
-      return matchesName && matchesDeadline;
-    });
-
-    this.visibleProjects = [...this.filteredProjects].sort((a, b) => this.compareBySort(a, b));
-    this.recomputeStatsFromFiltered();
-  }
-
-  private compareBySort(a: Project, b: Project): number {
-    const directionMultiplier = this.sortDirection === 'asc' ? 1 : -1;
-
-    let result = 0;
-    switch (this.sortColumn) {
-      case 'name': {
-        result = a.name.localeCompare(b.name);
-        break;
-      }
-      case 'score': {
-        result = a.score - b.score;
-        break;
-      }
-      case 'durationInDays': {
-        result = a.durationInDays - b.durationInDays;
-        break;
-      }
-      case 'bugsCount': {
-        result = a.bugsCount - b.bugsCount;
-        break;
-      }
-      case 'madeDeadline': {
-        result = (+a.madeDeadline - +b.madeDeadline);
-        break;
-      }
-    }
-
-    return result * directionMultiplier;
-  }
-
-  private recomputeStatsFromFiltered(): void {
     // Stats must be computed ONLY from currently visible filtered rows.
     // At the moment, we don't paginate, so "visible filtered rows" == filteredProjects.
-    const visibleFilteredRows = this.filteredProjects;
-
-    if (visibleFilteredRows.length === 0) {
-      this.averageScore = 0;
-      this.percentageMetDeadline = 0;
-      return;
-    }
-
-    const sum = visibleFilteredRows.reduce((acc, p) => acc + p.score, 0);
-    this.averageScore = sum / visibleFilteredRows.length;
-
-    const deadlineMet = visibleFilteredRows.filter((p) => p.madeDeadline === true).length;
-    this.percentageMetDeadline = (deadlineMet / visibleFilteredRows.length) * 100;
+    const stats = computeProjectsStatsFromFiltered(this.filteredProjects);
+    this.averageScore = stats.averageScore;
+    this.percentageMetDeadline = stats.percentageMetDeadline;
   }
 
   private extractErrorMessage(err: unknown, fallback: string): string {
