@@ -1,0 +1,50 @@
+<div class="page" *ngIf="!loading; else loadingTpl">
+  <div class="header-row">
+    <h2>Projects Info</h2>
+    <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+  </div>
+
+  <div class="layout">
+    <app-user-card *ngIf="personalDetails" [personalDetails]="personalDetails"></app-user-card>
+
+    <app-projects-table
+      [projectsBusy]="projectsBusy"
+      [projectsError]="projectsError"
+      [newProject]="newProject"
+      [averageScore]="averageScore"
+      [percentageMetDeadline]="percentageMetDeadline"
+      [nameFilter]="nameFilter"
+      [deadlineFilter]="deadlineFilter"
+      [sortColumn]="sortColumn"
+      [sortDirection]="sortDirection"
+      [visibleProjects]="visibleProjects"
+      [editProjectId]="editProjectId"
+      [editDraft]="editDraft"
+      (createProject)="onCreateProject()"
+      (deleteProject)="onDeleteProject($event)"
+      (startEdit)="startEdit($event)"
+      (cancelEdit)="cancelEdit()"
+      (saveEdit)="onSaveEdit()"
+      (newTextInput)="onNewText($event.value, $event.field)"
+      (newNumberInput)="onNewNumber($event.value, $event.field)"
+      (newMadeDeadlineChange)="onNewMadeDeadlineChange($event)"
+      (editTextInput)="onEditText($event.value, $event.field)"
+      (editNumberInput)="onEditNumber($event.value, $event.field)"
+      (editMadeDeadlineChange)="onEditMadeDeadlineChange($event)"
+      (nameFilterInput)="onNameFilterInput($event)"
+      (deadlineFilterInput)="onDeadlineFilterInput($event)"
+      (sortChange)="onSort($event)"
+    ></app-projects-table>
+  </div>
+
+  <div class="error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-page" role="status">
+    Loading info...
+  </div>
+</ng-template>
+
